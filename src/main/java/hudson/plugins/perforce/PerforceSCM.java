@@ -34,8 +34,10 @@ import hudson.model.TaskListener;
 import hudson.model.TopLevelItem;
 import hudson.remoting.VirtualChannel;
 import hudson.scm.ChangeLogParser;
+import hudson.scm.PollingResult;
 import hudson.scm.SCM;
 import hudson.scm.SCMDescriptor;
+import hudson.scm.SCMRevisionState;
 import hudson.util.FormValidation;
 import hudson.util.LogTaskListener;
 
@@ -390,8 +392,7 @@ public class PerforceSCM extends SCM {
      * @param build
      * @param env
      */
-    @Override
-    public void buildEnvVars(AbstractBuild build, Map<String, String> env) {
+    public void buildEnvVars(AbstractBuild<?,?> build, Map<String, String> env) {
         super.buildEnvVars(build, env);
         env.put("P4PORT", p4Port);
         env.put("P4USER", p4User);
@@ -2241,4 +2242,17 @@ public class PerforceSCM extends SCM {
         return result1.equals(result2);
     }
 
+    @Override
+    public SCMRevisionState calcRevisionsFromBuild(AbstractBuild<?, ?> abstractBuild, Launcher launcher,
+                                                   TaskListener taskListener) throws IOException, InterruptedException {
+        return null;
+    }
+
+    @Override
+    protected PollingResult compareRemoteRevisionWith(AbstractProject<?, ?> abstractProject, Launcher launcher,
+                                                      FilePath filePath, TaskListener taskListener,
+                                                      SCMRevisionState scmRevisionState)
+        throws IOException, InterruptedException {
+        return null;
+    }
 }
