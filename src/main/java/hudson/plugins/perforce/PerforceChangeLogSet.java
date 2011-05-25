@@ -7,9 +7,9 @@ import hudson.scm.ChangeLogSet;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.GregorianCalendar;
-import java.util.Iterator;
 import java.util.List;
 import java.nio.charset.Charset;
 
@@ -23,6 +23,7 @@ import org.kohsuke.stapler.framework.io.WriterOutputStream;
 
 /**
  * @author Mike Wille
+ * @author Nikita Levyankov
  */
 public class PerforceChangeLogSet extends ChangeLogSet<PerforceChangeLogEntry> {
 
@@ -33,23 +34,21 @@ public class PerforceChangeLogSet extends ChangeLogSet<PerforceChangeLogEntry> {
         this.history = Collections.unmodifiableList(logs);
     }
 
+    /**
+     * @return list of changed entries
+     * @deprecated
+     * @since 2.0.1
+     * @see #getLogs()
+     */
     public List<PerforceChangeLogEntry> getHistory() {
+        return new ArrayList<PerforceChangeLogEntry>(getLogs());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Collection<PerforceChangeLogEntry> getLogs() {
         return history;
-    }
-
-    /*
-     * @see hudson.scm.ChangeLogSet#isEmptySet()
-     */
-    @Override
-    public boolean isEmptySet() {
-        return history.size() == 0;
-    }
-
-    /*
-     * @see java.lang.Iterable#iterator()
-     */
-    public Iterator<PerforceChangeLogEntry> iterator() {
-        return history.iterator();
     }
 
     /**
@@ -67,7 +66,7 @@ public class PerforceChangeLogSet extends ChangeLogSet<PerforceChangeLogEntry> {
         ArrayList<PerforceChangeLogEntry> changeLogEntries = new ArrayList<PerforceChangeLogEntry>();
 
         SAXReader reader = new SAXReader();
-        Document changeDoc = null;
+        Document changeDoc;
         PerforceChangeLogSet changeLogSet = new PerforceChangeLogSet(build, changeLogEntries);
 
         try {
@@ -140,7 +139,7 @@ public class PerforceChangeLogSet extends ChangeLogSet<PerforceChangeLogEntry> {
      *            the stream to write to
      * @param changes
      *            the history objects to store
-     * @throws IOException
+     * @throws IOException if any
      */
     public static void saveToChangeLog(OutputStream outputStream, List<Changelist> changes) throws IOException {
         OutputStreamWriter writer = new OutputStreamWriter(outputStream, Charset.forName("UTF-8"));
@@ -224,7 +223,7 @@ public class PerforceChangeLogSet extends ChangeLogSet<PerforceChangeLogEntry> {
 
         String[] parts = newDate.split(" ");
         String[] date = parts[0].split("-");
-        String[] time = null;
+        String[] time;
 
         if (parts.length > 1) {
             time = parts[1].split(":");
