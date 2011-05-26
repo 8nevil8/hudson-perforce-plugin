@@ -1,6 +1,7 @@
 package hudson.plugins.perforce;
 
 import java.io.IOException;
+import java.text.Normalizer;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,7 +30,6 @@ public class PerforceChangeLogEntry extends ChangeLogSet.Entry {
         setParent(parent);
     }
     
-    @Override
     @Exported
     public User getAuthor() {
         User author = User.get(change.getUser());
@@ -49,7 +49,15 @@ public class PerforceChangeLogEntry extends ChangeLogSet.Entry {
         return author;
     }
 
+    public String getUser() {
+        return getAuthor().getDisplayName();
+    }
+
     @Override
+    public Collection<Changelist.FileEntry> getAffectedFiles() {
+        return change.getFiles();
+    }
+
     @Exported
     public Collection<String> getAffectedPaths() {
         List<String> paths = new ArrayList<String>(change.getFiles().size());
@@ -59,7 +67,6 @@ public class PerforceChangeLogEntry extends ChangeLogSet.Entry {
         return paths;
     }
 
-    @Override
     @Exported
     public String getMsg() {
         return change.getDescription();
@@ -74,6 +81,14 @@ public class PerforceChangeLogEntry extends ChangeLogSet.Entry {
     public String getChangeTime() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         return sdf.format(getChange().getDate());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getCurrentRevision() {
+        return getChangeNumber();
     }
 
     /**
